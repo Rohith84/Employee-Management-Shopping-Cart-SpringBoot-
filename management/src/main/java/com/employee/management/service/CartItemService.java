@@ -1,6 +1,7 @@
 package com.employee.management.service;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -51,8 +52,20 @@ public class CartItemService {
             cartItem.setPrice(product.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity())));
             cartItemRepository.save(cartItem);
         }
-
         return true;
-        
+    }
+    public boolean deleteItemFromCart(String userId,Long productId){
+        Optional<Product> productOpt=productRepository.findById(productId);
+        Optional<User> userOpt=userRepository.findById(Long.valueOf(userId));
+        if(productOpt.isPresent() && userOpt.isPresent()){
+            cartItemRepository.deleteByUserIdAndProductId(userOpt.get(),productOpt.get());
+            return true;
+        }
+        return false;
+    }
+
+    public List<CartItem> getCart(String userId){
+        return userRepository.findById(Long.valueOf(userId)).map(cartItemRepository::findByUser)
+        .orElseGet(List::of);
     }
 }
